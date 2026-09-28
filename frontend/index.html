@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CreditLens AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="topbar">
+        <span class="logo">💳 CreditLens AI</span>
+        <span class="tagline">Aide à la décision crédit</span>
+    </header>
+
+    <main class="layout">
+        <!-- Formulaire -->
+        <section class="card">
+            <div class="card-head">
+                <span class="card-icon">📋</span>
+                <h2>Formulaire de Demande de Crédit</h2>
+            </div>
+            <form id="creditForm" class="form-grid">
+                <div class="field">
+                    <label for="status_checking">Statut compte courant</label>
+                    <select id="status_checking">
+                        <option value="A11">Débiteurs (&lt; 0 DM)</option>
+                        <option value="A12">Entre 0 et 200 DM</option>
+                        <option value="A13">≥ 200 DM</option>
+                        <option value="A14">Pas de compte courant</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="duration_months">Durée du prêt (mois)</label>
+                    <input type="number" id="duration_months" value="24" min="1" max="120" required>
+                </div>
+
+                <div class="field">
+                    <label for="credit_history">Historique de crédit</label>
+                    <select id="credit_history">
+                        <option value="A30">Aucun crédit / tous remboursés</option>
+                        <option value="A31">Crédits de cette banque remboursés</option>
+                        <option value="A32" selected>Remboursements réguliers</option>
+                        <option value="A33">Retards de paiement passés</option>
+                        <option value="A34">Compte critique / crédits ailleurs</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="credit_amount">Montant (€)</label>
+                    <input type="number" id="credit_amount" value="3000" min="100" step="50" required>
+                </div>
+
+                <div class="field">
+                    <label for="savings">Épargne disponible</label>
+                    <select id="savings">
+                        <option value="A61">Faible (&lt; 100 DM)</option>
+                        <option value="A62">100 à 500 DM</option>
+                        <option value="A63">500 à 1000 DM</option>
+                        <option value="A64">≥ 1000 DM</option>
+                        <option value="A65">Inconnue / aucune</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="age">Âge</label>
+                    <input type="number" id="age" value="35" min="18" max="100" required>
+                </div>
+
+                <button type="submit" class="btn" id="evalBtn">⚡ Évaluer le risque</button>
+            </form>
+        </section>
+
+        <!-- Résultat -->
+        <section class="card">
+            <div class="card-head">
+                <span class="card-icon">📊</span>
+                <h2>Décision &amp; Score de Risque</h2>
+            </div>
+
+            <div id="resultEmpty" class="empty-state">
+                <span class="empty-icon">🗂️</span>
+                <p>Aucun dossier évalué pour le moment.</p>
+                <p class="empty-sub">Remplissez le formulaire à gauche puis cliquez sur « Évaluer le risque ».</p>
+            </div>
+
+            <div id="resultContent" class="result hidden">
+                <span id="verdictBadge" class="badge">—</span>
+                <div class="score-number" id="scoreNumber">—</div>
+                <p class="default-prob">Probabilité de Défaut : <strong id="defaultProb">—</strong></p>
+
+                <div id="factorsBlock" class="factors-block hidden">
+                    <h3>Facteurs déterminants</h3>
+                    <ul id="factorsList" class="factors"></ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Lanceur de l'assistant : caché tant qu'aucun dossier n'est évalué -->
+    <button type="button" id="chatLauncher" class="chat-launcher hidden">
+        <span class="chat-launcher-icon">🤖</span>
+        <span>
+            <span class="chat-launcher-title">Assistant CreditLens</span>
+            <span class="chat-launcher-sub" id="launcherSub">Cliquez pour poser une question</span>
+        </span>
+    </button>
+
+    <!-- Panneau de discussion -->
+    <aside class="chat-drawer" id="chatDrawer" aria-hidden="true">
+        <div class="chat-header">
+            <div>
+                <div class="chat-title">🤖 Assistant CreditLens</div>
+                <div class="chat-subtitle" id="chatSubtitle">Sur le dossier en cours</div>
+            </div>
+            <div class="chat-header-actions">
+                <div class="lang-toggle" id="langToggle" role="group" aria-label="Langue de l'assistant">
+                    <button type="button" data-lang="fr" class="active">FR</button>
+                    <button type="button" data-lang="en">EN</button>
+                </div>
+                <button type="button" id="muteBtn" class="icon-btn" aria-label="Couper la lecture audio" title="Couper la lecture audio">🔊</button>
+                <button type="button" id="chatClose" class="icon-btn" aria-label="Fermer">✕</button>
+            </div>
+        </div>
+        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-suggestions" id="chatSuggestions">
+            <button type="button" data-q="Pourquoi cette décision ?">Pourquoi cette décision ?</button>
+            <button type="button" data-q="Que faudrait-il changer pour obtenir un accord ?">Comment obtenir un accord ?</button>
+        </div>
+        <div class="chat-input">
+            <textarea id="chatInput" rows="1" placeholder="Posez une question..." autocomplete="off"></textarea>
+            <button type="button" id="micBtn" class="icon-btn mic-btn" aria-label="Poser une question à l'oral" title="Poser une question à l'oral">🎤</button>
+            <button type="button" id="sendBtn">Envoyer</button>
+        </div>
+    </aside>
+
+    <script src="script.js"></script>
+</body>
+</html>
