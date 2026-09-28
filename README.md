@@ -1,4 +1,4 @@
-# CreditLens - Système de Scoring de Crédit Explicable
+
 # 💳 CreditLens - Scoring Pipeline & Financial Analytics
 
 **CreditLens** est un pipeline complet de Machine Learning et d'évaluation du risque de crédit bancaire. Le projet intègre le traitement des données, l'entraînement d'un modèle XGBoost, une API REST d'inférence (FastAPI/Streamlit) ainsi qu'un tableau de bord analytique et interactif.
